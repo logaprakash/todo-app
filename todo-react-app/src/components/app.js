@@ -15,45 +15,24 @@ class App extends Component  {
     constructor(props) {
         super(props);
         this.state = {
-            bucketList: [
-                {   
-                    id:1,
-                    name:"Morning Task",
-                    todoList:[
-                            {
-                                id:1,
-                                text:"Wake up at 8",
-                                isChecked: false
-                            },
-                            {
-                                id:2,
-                                text:"Brush",
-                                isChecked: false
-                            },
-                            {
-                                id:3,
-                                text:"Coffee",
-                                isChecked: false
-                            }
-                        ]
-                }
-            ],
-            lastBucketId:1,
-            bucketName:""
+            bucketList: [],
+            lastBucketId:0,
+            bucketName:'',
+            itemText:'',
         }
     }
 
-
-    handleChange(value){
+    handleBucketChange(value){
         this.setState({bucketName:value})
     }
+
     
     addBucket() {
         if(this.state.bucketName !== '' ){ 
             
-            const tempLastBucketId = this.state.lastBucketId
-            const tempBucketName = this.state.bucketName
-            const tempList = {
+            let tempLastBucketId = this.state.lastBucketId
+            let tempBucketName = this.state.bucketName
+            let tempList = {
                 id:tempLastBucketId+1,
                 name:tempBucketName,
                 todoList:[],
@@ -67,12 +46,44 @@ class App extends Component  {
 
     }
 
+    addItemToBucket(bucketId){
+        let bucketList = []
+        let tempBucketList = this.state.bucketList
+        for (let i = 0; i < tempBucketList.length; i++) {
+            if(tempBucketList[i].id === bucketId){
+                let tempTodo = {
+                    id:tempBucketList[i].todoList.length+1,
+                    text:'',
+                    is_checked:false
+                }
+                tempBucketList[i].todoList = [...tempBucketList[i].todoList,tempTodo]
+            }
+            bucketList = [...bucketList, tempBucketList[i]]
+        } 
+        this.setState({bucketList:bucketList})
+    }
+
+    
+
     deleteToDoItem(bucketId,itemId){
-        console.log("Remove Item from Bucket")
+        
+        let bucketList = []
+        let tempBucketList = this.state.bucketList
+        for (let i = 0; i < tempBucketList.length; i++) {
+            if(tempBucketList[i].id === bucketId){
+                tempBucketList[i].todoList = tempBucketList[i].todoList.filter(function(todo) { 
+                    return todo.id !== itemId
+                });
+            }
+            bucketList = [...bucketList, tempBucketList[i]] 
+        }
+        this.setState({bucketList:bucketList})
     }
 
     deleteBucket(bucketId){
-        console.log("Remove Bucket")
+        this.setState({bucketList: this.state.bucketList.filter(function(bucket) { 
+            return bucket.id !== bucketId
+        })});
     }
 
     render(){ 
@@ -90,7 +101,7 @@ class App extends Component  {
                         <FormControl
                             placeholder="Bucket Name"
                             id="add-bucket-textbox"
-                            onChange={item=>this.handleChange(item.target.value)}
+                            onChange={item=>this.handleBucketChange(item.target.value)}
                         />
 
                         <InputGroup.Append>
@@ -103,7 +114,7 @@ class App extends Component  {
             <Row>
                 {this.state.bucketList.map(bucket => (
                 
-                    <Col>
+                    <Col key={bucket.id}>
                             <Card style={{ width: '18rem' }}>
                         
                             <Card.Body>
@@ -113,21 +124,24 @@ class App extends Component  {
                                             {bucket.name}
                                         </Col> 
                                         <Col>
-                                            <Button variant="primary" size="sm">+</Button> 
+                                            <Button variant="primary" size="sm" onClick={()=>this.addItemToBucket(bucket.id)}>+</Button> 
                                             <Button variant="danger" size="sm" onClick={()=>this.deleteBucket(bucket.id)}>X</Button> 
                                         </Col>
 
                                     </Row>
                                 </Card.Title>
                                 <Card.Text>
-                                    <ListGroup>
+                                    <ListGroup key={'TODO_LIST_'+bucket.id} >
                                         {bucket.todoList.map(todo => (
                                             <ListGroup.Item>
                                                 <InputGroup className="mb-3">
                                                     <InputGroup.Prepend>
                                                         <InputGroup.Checkbox/>
                                                     </InputGroup.Prepend>
-                                                    <FormControl value={todo.text} />
+                                                    <FormControl
+                                                        defaultValue={todo.text} 
+                                                        placeholder="ToDo Item"
+                                                    />
                                                     <InputGroup.Append>
                                                         <Button variant="danger" size="sm" onClick={()=>this.deleteToDoItem(bucket.id,todo.id)}>X</Button> 
                                                     </InputGroup.Append>
@@ -137,8 +151,6 @@ class App extends Component  {
                                         ))}
                                     </ListGroup>
                                 </Card.Text>
-                                
-                                <Button variant="primary" size="lg" block>Edit</Button>
                             </Card.Body>
 
                             </Card>
