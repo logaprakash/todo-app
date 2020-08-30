@@ -13,4 +13,4 @@ Made using React (16.13.1) and Django (3.1)
 5) Start React Application (command: 'npm start' inside React folder)
 
 # Screenshot of application
-![app_screenshot](app_screenshot.png)
+![](https://github.com/logaprakash/todo-app/blob/master/app_screenshoot.png)
