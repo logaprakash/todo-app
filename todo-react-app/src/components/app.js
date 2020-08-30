@@ -1,6 +1,5 @@
 import React, {Component} from 'react'; 
   
-// Bootstrap for react 
 import Row from 'react-bootstrap/Row'; 
 import Col from 'react-bootstrap/Col'; 
 import Button from 'react-bootstrap/Button'; 
@@ -18,7 +17,7 @@ class App extends Component  {
         this.state = {
             bucketList: [],
             bucketName:'',
-            itemText:'',
+            itemText:''
         } 
         this.forceUpdateHandler = this.forceUpdateHandler.bind(this); 
 
@@ -30,7 +29,6 @@ class App extends Component  {
 
     componentDidMount(){
         this.reloadBuckets()
-        
     }
 
     reloadBuckets(){
@@ -211,20 +209,39 @@ class App extends Component  {
             </Tooltip>
           );
         
-          const addBucketTooltip = (props) => (
+        const addItemTooltip = (props) => (
             <Tooltip id="button-tooltip" {...props}>
-              Add Bucket to list
+                Add Item to bucket
             </Tooltip>
-          );
+        );
+
+        const RemoveItemTooltip = (props) => (
+            <Tooltip id="button-tooltip" {...props}>
+                Remove Todo From Bucket
+            </Tooltip>
+        );
+
+        const RemoveBucketTooltip = (props) => (
+            <Tooltip id="button-tooltip" {...props}>
+                Delete Bucket
+            </Tooltip>
+        );
+
+        const SaveBucketTooltip = (props) => (
+            <Tooltip id="button-tooltip" {...props}>
+                Save Bucket to server
+            </Tooltip>
+        );
       return(
        
-        <div style={{ background: '#03c6fc' }}>
+        <div style={{ background: '#03c6fc',top:'0', bottom:'0', left:'0', right:'0', position: 'absolute'}} >
             <Navbar bg="light" expand="lg">
                 <Navbar.Brand>Todo List</Navbar.Brand>
             </Navbar>
-            <br></br>
+            
 
             <div style={{ padding: '2rem' }}>
+                
                 <Row>
                     <Col>
                         <InputGroup className="mb-3">
@@ -249,6 +266,7 @@ class App extends Component  {
                         </InputGroup>
                     </Col>
                 </Row>
+                
                 <Row style={{ padding: '2rem' }} >
                     {this.state.bucketList.map(bucket => (
                     
@@ -262,8 +280,20 @@ class App extends Component  {
                                                 {bucket.bucket_name}
                                             </Col> 
                                             <Col xs lg="4">
-                                                <Button variant="primary" size="sm" onClick={()=>this.addItemToBucket(bucket.bucket_id)}>+</Button> 
-                                                <Button variant="danger" size="sm" onClick={()=>this.deleteBucket(bucket.bucket_id)}>X</Button> 
+                                                <OverlayTrigger
+                                                    placement="bottom"
+                                                    delay={{ show: 250, hide: 400 }}
+                                                    overlay={addItemTooltip}
+                                                >
+                                                    <Button variant="primary" size="sm" onClick={()=>this.addItemToBucket(bucket.bucket_id)}>+</Button> 
+                                                </OverlayTrigger>
+                                                <OverlayTrigger
+                                                    placement="bottom"
+                                                    delay={{ show: 250, hide: 400 }}
+                                                    overlay={RemoveBucketTooltip}
+                                                >
+                                                    <Button variant="danger" size="sm" onClick={()=>this.deleteBucket(bucket.bucket_id)}>X</Button> 
+                                                </OverlayTrigger>
                                             </Col>
 
                                         </Row>
@@ -285,7 +315,13 @@ class App extends Component  {
                                                             onChange={item=>this.handleTodoTextChange(bucket.bucket_id,todo.todo_id,item.target.value)}
                                                         />
                                                         <InputGroup.Append>
-                                                            <Button variant="danger" size="sm" onClick={()=>this.deleteToDoItem(todo.todo_id)}>X</Button> 
+                                                            <OverlayTrigger
+                                                                placement="bottom"
+                                                                delay={{ show: 250, hide: 400 }}
+                                                                overlay={RemoveItemTooltip}
+                                                            >
+                                                                <Button variant="danger" size="sm" onClick={()=>this.deleteToDoItem(todo.todo_id)}>X</Button> 
+                                                            </OverlayTrigger>
                                                         </InputGroup.Append>
                                                     </InputGroup>
                                                     
@@ -294,7 +330,13 @@ class App extends Component  {
                                         </ListGroup>
                                     </Card.Text>
                                 </Card.Body>
-                                    <Button variant="primary" onClick={()=>this.saveBucket(bucket.bucket_id)}>Save Bucket</Button>
+                                    <OverlayTrigger
+                                        placement="bottom"
+                                        delay={{ show: 250, hide: 400 }}
+                                        overlay={SaveBucketTooltip}
+                                    >
+                                        <Button variant="primary" onClick={()=>this.saveBucket(bucket.bucket_id)}>Save Bucket</Button>
+                                    </OverlayTrigger>
                                 </Card>
                         </Col>
 
@@ -302,6 +344,7 @@ class App extends Component  {
                 </Row>
 
             </div>
+            
         </div>
 
       ); 
