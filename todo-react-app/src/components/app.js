@@ -16,10 +16,22 @@ class App extends Component  {
         super(props);
         this.state = {
             bucketList: [],
-            lastBucketId:0,
             bucketName:'',
             itemText:'',
-        }
+        }  
+    }
+
+    componentDidMount(){
+        this.reloadBuckets(0)
+    }
+
+    reloadBuckets(){
+        fetch('http://localhost:8000/api/get_buckets')
+            .then(response => response.json())
+            .then(data => {
+                    this.setState({bucketList:data})
+                }
+        );
     }
 
     handleBucketChange(value){
@@ -30,16 +42,25 @@ class App extends Component  {
     addBucket() {
         if(this.state.bucketName !== '' ){ 
             
-            let tempLastBucketId = this.state.lastBucketId
             let tempBucketName = this.state.bucketName
             let tempList = {
-                id:tempLastBucketId+1,
-                name:tempBucketName,
+                bucket_id:tempLastBucketId+1,
+                bucket_name:tempBucketName,
                 todoList:[],
             }
+
+            fetch('https://mywebsite.com/endpoint/', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    bucket_name: tempBucketName,
+                })
+            })
             
-            this.setState({lastBucketId:tempLastBucketId+1})
-            this.setState({bucketList:[...this.state.bucketList, tempList]})
+            this.reloadBuckets()
         }else{
             alert("Bucket Name is mandatory")
         }
@@ -50,7 +71,7 @@ class App extends Component  {
         let bucketList = []
         let tempBucketList = this.state.bucketList
         for (let i = 0; i < tempBucketList.length; i++) {
-            if(tempBucketList[i].id === bucketId){
+            if(tempBucketList[i].bucket_id === bucketId){
                 let tempTodo = {
                     id:tempBucketList[i].todoList.length+1,
                     text:'',
@@ -70,7 +91,7 @@ class App extends Component  {
         let bucketList = []
         let tempBucketList = this.state.bucketList
         for (let i = 0; i < tempBucketList.length; i++) {
-            if(tempBucketList[i].id === bucketId){
+            if(tempBucketList[i].bucket_id === bucketId){
                 tempBucketList[i].todoList = tempBucketList[i].todoList.filter(function(todo) { 
                     return todo.id !== itemId
                 });
@@ -82,7 +103,7 @@ class App extends Component  {
 
     deleteBucket(bucketId){
         this.setState({bucketList: this.state.bucketList.filter(function(bucket) { 
-            return bucket.id !== bucketId
+            return bucket.bucket_id !== bucketId
         })});
     }
 
@@ -114,25 +135,25 @@ class App extends Component  {
             <Row>
                 {this.state.bucketList.map(bucket => (
                 
-                    <Col key={bucket.id}>
+                    <Col key={bucket.bucket_id}>
                             <Card style={{ width: '18rem' }}>
                         
                             <Card.Body>
                                 <Card.Title>
                                     <Row>
                                         <Col>
-                                            {bucket.name}
+                                            {bucket.bucket_name}
                                         </Col> 
                                         <Col>
-                                            <Button variant="primary" size="sm" onClick={()=>this.addItemToBucket(bucket.id)}>+</Button> 
-                                            <Button variant="danger" size="sm" onClick={()=>this.deleteBucket(bucket.id)}>X</Button> 
+                                            <Button variant="primary" size="sm" onClick={()=>this.addItemToBucket(bucket.bucket_id)}>+</Button> 
+                                            <Button variant="danger" size="sm" onClick={()=>this.deleteBucket(bucket.bucket_id)}>X</Button> 
                                         </Col>
 
                                     </Row>
                                 </Card.Title>
                                 <Card.Text>
-                                    <ListGroup key={'TODO_LIST_'+bucket.id} >
-                                        {bucket.todoList.map(todo => (
+                                    <ListGroup key={'TODO_LIST_'+bucket.bucket_id} >
+                                        {bucket.todo_list.map(todo => (
                                             <ListGroup.Item>
                                                 <InputGroup className="mb-3">
                                                     <InputGroup.Prepend>
@@ -143,7 +164,7 @@ class App extends Component  {
                                                         placeholder="ToDo Item"
                                                     />
                                                     <InputGroup.Append>
-                                                        <Button variant="danger" size="sm" onClick={()=>this.deleteToDoItem(bucket.id,todo.id)}>X</Button> 
+                                                        <Button variant="danger" size="sm" onClick={()=>this.deleteToDoItem(bucket.bucket_id,todo.id)}>X</Button> 
                                                     </InputGroup.Append>
                                                 </InputGroup>
                                                 
