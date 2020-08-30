@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^insert_bucket', views.insert_bucket, name='insert_bucket'),
     url(r'^delete_bucket', views.delete_bucket, name='delete_bucket'),
     url(r'^insert_todo_to_bucket', views.insert_todo_to_bucket, name='insert_todo_to_bucket'),
+    url(r'^delete_todo_from_bucket', views.delete_todo_from_bucket, name='delete_todo_from_bucket')
 
 ]
 

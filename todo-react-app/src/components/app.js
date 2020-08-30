@@ -1,7 +1,6 @@
 import React, {Component} from 'react'; 
   
 // Bootstrap for react 
-import Container from 'react-bootstrap/Container'; 
 import Row from 'react-bootstrap/Row'; 
 import Col from 'react-bootstrap/Col'; 
 import Button from 'react-bootstrap/Button'; 
@@ -10,6 +9,8 @@ import FormControl from 'react-bootstrap/FormControl';
 import ListGroup from 'react-bootstrap/ListGroup'; 
 import Card from 'react-bootstrap/Card'; 
 import Navbar from 'react-bootstrap/Navbar'; 
+import Tooltip from 'react-bootstrap/Tooltip'; 
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger'; 
   
 class App extends Component  { 
     constructor(props) {
@@ -20,6 +21,7 @@ class App extends Component  {
             itemText:'',
         } 
         this.forceUpdateHandler = this.forceUpdateHandler.bind(this); 
+
     }
     forceUpdateHandler(){
         this.forceUpdate();
@@ -27,7 +29,8 @@ class App extends Component  {
       
 
     componentDidMount(){
-        this.reloadBuckets(0)
+        this.reloadBuckets()
+        
     }
 
     reloadBuckets(){
@@ -37,12 +40,56 @@ class App extends Component  {
                     this.setState({bucketList:data})
                 }
         );
-        
     }
 
     handleBucketChange(value){
         this.setState({bucketName:value})
     }
+
+    handleTodoTextChange(bucket_id,todo_id,text){
+        let tempBucketList = []
+        for(let bucket_index=0;bucket_index<this.state.bucketList.length;bucket_index++){
+            let bucket = this.state.bucketList[bucket_index]
+            let todo_list = []
+            if(bucket.bucket_id === bucket_id){
+                
+                for(let todo_index=0;todo_index<bucket.todo_list.length;todo_index++){
+                    let todo = bucket.todo_list[todo_index]
+                    if(todo.todo_id === todo_id){
+                        todo.todo_text = text
+                    }
+                    todo_list = [...todo_list,todo]
+                }
+            }
+            bucket.todo_list = todo_list
+            tempBucketList = [...tempBucketList,bucket]
+        }
+
+        this.setState({bucketList:tempBucketList})
+    }
+
+    handleTodoCheckedChange(bucket_id,todo_id,is_checked){
+        let tempBucketList = []
+        for(let bucket_index=0;bucket_index<this.state.bucketList.length;bucket_index++){
+            let bucket = this.state.bucketList[bucket_index]
+            let todo_list = []
+            if(bucket.bucket_id === bucket_id){
+                
+                for(let todo_index=0;todo_index<bucket.todo_list.length;todo_index++){
+                    let todo = bucket.todo_list[todo_index]
+                    if(todo.todo_id === todo_id){
+                        todo.is_checked = is_checked
+                    }
+                    todo_list = [...todo_list,todo]
+                }
+            }
+            bucket.todo_list = todo_list
+            tempBucketList = [...tempBucketList,bucket]
+        }
+
+        this.setState({bucketList:tempBucketList})
+    }
+
 
     
     addBucket() {
@@ -62,11 +109,11 @@ class App extends Component  {
                 }
             );
 
-            this.reloadBuckets()
-            this.forceUpdateHandler()
+            window.location.reload(false);
             
         }else{
             alert("Bucket Name is mandatory")
+            this.setShow(true)
         }
 
     }
@@ -86,27 +133,29 @@ class App extends Component  {
             }
         );
 
-        this.reloadBuckets()
-        this.forceUpdateHandler()
+        window.location.reload(false);
     }
 
     
 
-    deleteToDoItem(bucketId,itemId){
+    deleteToDoItem(todo_id){
         
-        let bucketList = []
-        let tempBucketList = this.state.bucketList
-        for (let i = 0; i < tempBucketList.length; i++) {
-            if(tempBucketList[i].bucket_id === bucketId){
-                tempBucketList[i].todoList = tempBucketList[i].todoList.filter(function(todo) { 
-                    return todo.id !== itemId
-                });
+        
+        const body = new FormData
+        body.append("todo_id", todo_id)
+
+        fetch("http://localhost:8000/api/delete_todo_from_bucket", {
+            body,
+            headers: {},
+            method: "DELETE"
+        }).then(response => response.json())
+        .then(data => {
+                console.log(data)
             }
-            bucketList = [...bucketList, tempBucketList[i]] 
-        }
-        this.setState({bucketList:bucketList})
+        );
+
         
-        
+        window.location.reload(false);
 
     }
 
@@ -126,85 +175,135 @@ class App extends Component  {
         );
 
         
-        this.reloadBuckets()
-        this.forceUpdateHandler()
+        window.location.reload(false);
         
     }
 
+    saveBucket(bucket_id){
+        const body = new FormData
+        let bucket = {}
+        for(let bucket_index=0;bucket_index<this.state.bucketList.length;bucket_index++){
+            if(this.state.bucketList[bucket_index].bucket_id === bucket_id){
+                bucket = this.state.bucketList[bucket_index]
+                break
+            }
+        }
+        body.append("bucket_id", bucket.bucket_id)
+        body.append("todo_list", JSON.stringify(bucket.todo_list))
+
+        fetch("http://localhost:8000/api/save_bucket", {
+            body,
+            headers: {},
+            method: "POST"
+        }).then(response => response.json())
+        .then(data => {
+                console.log(data)
+            }
+        );
+
+        window.location.reload(false);    
+    }
+
     render(){ 
+        const addBucketTooltip = (props) => (
+            <Tooltip id="button-tooltip" {...props}>
+              Add Bucket to list
+            </Tooltip>
+          );
+        
+          const addBucketTooltip = (props) => (
+            <Tooltip id="button-tooltip" {...props}>
+              Add Bucket to list
+            </Tooltip>
+          );
       return(
        
-        <Container>
+        <div style={{ background: '#03c6fc' }}>
             <Navbar bg="light" expand="lg">
                 <Navbar.Brand>Todo List</Navbar.Brand>
             </Navbar>
             <br></br>
-            <Row>
-                <Col>
-                    <InputGroup className="mb-3">
 
-                        <FormControl
-                            placeholder="Bucket Name"
-                            id="add-bucket-textbox"
-                            onChange={item=>this.handleBucketChange(item.target.value)}
-                        />
+            <div style={{ padding: '2rem' }}>
+                <Row>
+                    <Col>
+                        <InputGroup className="mb-3">
 
-                        <InputGroup.Append>
-                            <Button variant="primary" onClick={()=>this.addBucket()}>Add Bucket</Button>
-                        </InputGroup.Append>
+                            <FormControl
+                                placeholder="Bucket Name"
+                                id="add-bucket-textbox"
+                                onChange={item=>this.handleBucketChange(item.target.value)}
+                            />
 
-                    </InputGroup>
-                </Col>
-            </Row>
-            <Row>
-                {this.state.bucketList.map(bucket => (
-                
-                    <Col key={bucket.bucket_id}>
-                            <Card style={{ width: '18rem' }}>
-                        
-                            <Card.Body>
-                                <Card.Title>
-                                    <Row>
-                                        <Col>
-                                            {bucket.bucket_name}
-                                        </Col> 
-                                        <Col>
-                                            <Button variant="primary" size="sm" onClick={()=>this.addItemToBucket(bucket.bucket_id)}>+</Button> 
-                                            <Button variant="danger" size="sm" onClick={()=>this.deleteBucket(bucket.bucket_id)}>X</Button> 
-                                        </Col>
+                            <InputGroup.Append>
+                            <OverlayTrigger
+                                placement="bottom"
+                                delay={{ show: 250, hide: 400 }}
+                                overlay={addBucketTooltip}
+                            >
+                                <Button variant="primary" onClick={()=>this.addBucket()}>Add Bucket</Button>
+                            </OverlayTrigger>
+                            </InputGroup.Append>
+                            
 
-                                    </Row>
-                                </Card.Title>
-                                <Card.Text>
-                                    <ListGroup key={'TODO_LIST_'+bucket.bucket_id} >
-                                        {bucket.todo_list.map(todo => (
-                                            <ListGroup.Item>
-                                                <InputGroup className="mb-3">
-                                                    <InputGroup.Prepend>
-                                                        <InputGroup.Checkbox/>
-                                                    </InputGroup.Prepend>
-                                                    <FormControl
-                                                        defaultValue={todo.text} 
-                                                        placeholder="ToDo Item"
-                                                    />
-                                                    <InputGroup.Append>
-                                                        <Button variant="danger" size="sm" onClick={()=>this.deleteToDoItem(bucket.bucket_id,todo.id)}>X</Button> 
-                                                    </InputGroup.Append>
-                                                </InputGroup>
-                                                
-                                            </ListGroup.Item>
-                                        ))}
-                                    </ListGroup>
-                                </Card.Text>
-                            </Card.Body>
-                                <Button variant="primary">Save Bucket</Button>
-                            </Card>
+                        </InputGroup>
                     </Col>
+                </Row>
+                <Row style={{ padding: '2rem' }} >
+                    {this.state.bucketList.map(bucket => (
+                    
+                        <Col key={bucket.bucket_id} md="auto" style={{ padding: '1rem' }}>
+                                <Card style={{ width: '18rem' }}>
+                            
+                                <Card.Body>
+                                    <Card.Title>
+                                        <Row>
+                                            <Col >
+                                                {bucket.bucket_name}
+                                            </Col> 
+                                            <Col xs lg="4">
+                                                <Button variant="primary" size="sm" onClick={()=>this.addItemToBucket(bucket.bucket_id)}>+</Button> 
+                                                <Button variant="danger" size="sm" onClick={()=>this.deleteBucket(bucket.bucket_id)}>X</Button> 
+                                            </Col>
 
-                ))}
-            </Row>
-            
-        </Container>
+                                        </Row>
+                                    </Card.Title>
+                                    <Card.Text>
+                                        <ListGroup key={'TODO_LIST_'+bucket.bucket_id} >
+                                            {bucket.todo_list.map(todo => (
+                                                <ListGroup.Item key={'TODO_ITEM_'+todo.todo_id}>
+                                                    <InputGroup className="mb-3">
+                                                        <InputGroup.Prepend>
+                                                            <InputGroup.Checkbox
+                                                                checked={todo.is_checked}
+                                                                onChange={item=>this.handleTodoCheckedChange(bucket.bucket_id,todo.todo_id,item.target.checked)}
+                                                            />
+                                                        </InputGroup.Prepend>
+                                                        <FormControl
+                                                            defaultValue={todo.todo_text} 
+                                                            placeholder="ToDo Item"
+                                                            onChange={item=>this.handleTodoTextChange(bucket.bucket_id,todo.todo_id,item.target.value)}
+                                                        />
+                                                        <InputGroup.Append>
+                                                            <Button variant="danger" size="sm" onClick={()=>this.deleteToDoItem(todo.todo_id)}>X</Button> 
+                                                        </InputGroup.Append>
+                                                    </InputGroup>
+                                                    
+                                                </ListGroup.Item>
+                                            ))}
+                                        </ListGroup>
+                                    </Card.Text>
+                                </Card.Body>
+                                    <Button variant="primary" onClick={()=>this.saveBucket(bucket.bucket_id)}>Save Bucket</Button>
+                                </Card>
+                        </Col>
+
+                    ))}
+                </Row>
+
+            </div>
+        </div>
+
       ); 
     } 
   } 

@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from todo_app.models import Bucket, Todo
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,6 @@ logger = logging.getLogger(__name__)
 def get_buckets(request):
     if request.method == 'GET':
         bucket_list = Bucket.objects.all()
-        logger.error(bucket_list)
         responseList = []
         for bucket in bucket_list:
             response = {
@@ -25,12 +25,12 @@ def get_buckets(request):
             for todo in todo_list:
                 todo = {
                     "todo_id":todo.todo_id,
-                    "text":todo.todo_text,
+                    "todo_text":todo.todo_text,
                     "is_checked":todo.is_checked
                 }
                 response["todo_list"].append(todo)
             responseList.append(response)
-
+        logger.error(responseList)
         return Response(responseList)
 
 @api_view(['DELETE'])
@@ -39,9 +39,14 @@ def delete_bucket(request):
         data = request.data.dict()
         bucket = Bucket.objects.get(pk=data["bucket_id"])
         bucket.delete()
-        # todo_list = Todo.objects.filter(bucket_id=data["bucket_id"])
-        # for todo in todo_list:
-        #     todo.delete()
+        return Response("Deleted")
+
+@api_view(['DELETE'])
+def delete_todo_from_bucket(request):
+    if request.method == 'DELETE':
+        data = request.data.dict()
+        todo = Todo.objects.get(pk=data["todo_id"])
+        todo.delete()
         return Response("Deleted")
 
 @api_view(['POST'])
@@ -62,8 +67,22 @@ def insert_todo_to_bucket(request):
 @api_view(['POST'])
 def save_bucket(request):
     if request.method == 'POST':
-        logger.error(request.POST)
-        responseList = []
-        return Response(responseList)
+        data = request.data.dict()
+        data_todo_list = json.loads(data["todo_list"])
+       
+        todo_dict = {}
+        for todo in data_todo_list:
+            todo_dict[todo["todo_id"]] = todo
+        logger.error(todo_dict)
+        todo_list =Todo.objects.filter(bucket_id =data["bucket_id"])
+        for todo in todo_list:
+            if todo.todo_id in todo_dict:
+                todo_obj = Todo.objects.get(pk=todo.todo_id)
+                if "todo_text" in todo_dict[todo.todo_id]:
+                    todo_obj.todo_text = todo_dict[todo.todo_id]["todo_text"]
+                if "is_checked" in todo_dict[todo.todo_id]:
+                    todo_obj.is_checked = todo_dict[todo.todo_id]["is_checked"]
+                todo_obj.save()
+        return Response("Saved Bucket")
 
 
