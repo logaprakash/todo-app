@@ -31,6 +31,7 @@ class App extends Component  {
     componentDidMount(){
         this.reloadBuckets()
         document.title = "Todo App"
+        document.body.style = 'background: #2d6e96;';
     }
 
     reloadBuckets(){
@@ -235,7 +236,7 @@ class App extends Component  {
         );
       return(
        
-        <div style={{ background: '#03c6fc',top:'0', bottom:'0', left:'0', right:'0', position: 'absolute'}} >
+        <div className="application">
             <Navbar bg="light" expand="lg">
                 <Navbar.Brand>Todo List</Navbar.Brand>
             </Navbar>
@@ -261,7 +262,7 @@ class App extends Component  {
                                 delay={{ show: 250, hide: 400 }}
                                 overlay={addBucketTooltip}
                             >
-                                <Button variant="primary" onClick={()=>this.addBucket()}>Add Bucket</Button>
+                                <Button variant="secondary" onClick={()=>this.addBucket()}>Add Bucket</Button>
                             </OverlayTrigger>
                             </InputGroup.Append>
                             
@@ -288,7 +289,7 @@ class App extends Component  {
                                                     delay={{ show: 250, hide: 400 }}
                                                     overlay={addItemTooltip}
                                                 >
-                                                    <Button variant="primary" size="sm" onClick={()=>this.addItemToBucket(bucket.bucket_id)}>+</Button> 
+                                                    <Button variant="secondary" size="sm" onClick={()=>this.addItemToBucket(bucket.bucket_id)}>+</Button> 
                                                 </OverlayTrigger>
                                                 <OverlayTrigger
                                                     placement="bottom"
@@ -343,7 +344,7 @@ class App extends Component  {
                                         delay={{ show: 250, hide: 400 }}
                                         overlay={SaveBucketTooltip}
                                     >
-                                        <Button variant="primary" onClick={()=>this.saveBucket(bucket.bucket_id)}>Save Bucket</Button>
+                                        <Button variant="secondary" onClick={()=>this.saveBucket(bucket.bucket_id)}>Save Bucket</Button>
                                     </OverlayTrigger>
                                 </Card>
                         </Col>
