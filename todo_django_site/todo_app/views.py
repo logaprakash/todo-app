@@ -15,7 +15,9 @@ def get_buckets(request):
     if request.method == 'GET':
         bucket_list = Bucket.objects.all()
         responseList = []
+        
         for bucket in bucket_list:
+            selected_count = 0
             response = {
                 "bucket_id":bucket.bucket_id,
                 "bucket_name":bucket.bucket_name,
@@ -23,14 +25,16 @@ def get_buckets(request):
             }
             todo_list =Todo.objects.filter(bucket_id =bucket.bucket_id)
             for todo in todo_list:
-                todo = {
+                todo_dict = {
                     "todo_id":todo.todo_id,
                     "todo_text":todo.todo_text,
                     "is_checked":todo.is_checked
                 }
-                response["todo_list"].append(todo)
+                if todo.is_checked:
+                    selected_count +=1
+                response["todo_list"].append(todo_dict)
+            response["selected_count"] = selected_count
             responseList.append(response)
-        logger.error(responseList)
         return Response(responseList)
 
 @api_view(['DELETE'])

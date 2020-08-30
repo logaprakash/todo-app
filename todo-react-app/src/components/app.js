@@ -50,9 +50,9 @@ class App extends Component  {
         let tempBucketList = []
         for(let bucket_index=0;bucket_index<this.state.bucketList.length;bucket_index++){
             let bucket = this.state.bucketList[bucket_index]
-            let todo_list = []
+            let todo_list = bucket.todo_list
             if(bucket.bucket_id === bucket_id){
-                
+                todo_list = []
                 for(let todo_index=0;todo_index<bucket.todo_list.length;todo_index++){
                     let todo = bucket.todo_list[todo_index]
                     if(todo.todo_id === todo_id){
@@ -72,9 +72,9 @@ class App extends Component  {
         let tempBucketList = []
         for(let bucket_index=0;bucket_index<this.state.bucketList.length;bucket_index++){
             let bucket = this.state.bucketList[bucket_index]
-            let todo_list = []
+            let todo_list = bucket.todo_list
             if(bucket.bucket_id === bucket_id){
-                
+                todo_list = []
                 for(let todo_index=0;todo_index<bucket.todo_list.length;todo_index++){
                     let todo = bucket.todo_list[todo_index]
                     if(todo.todo_id === todo_id){
@@ -333,6 +333,9 @@ class App extends Component  {
                                                 </ListGroup.Item>
                                             ))}
                                         </ListGroup>
+                                        <Row style={{padding:"1rem"}}>
+                                            <Col className="text-center"><b>Completed {bucket.selected_count}/{bucket.todo_list.length}</b></Col>
+                                        </Row>
                                     </Card.Text>
                                 </Card.Body>
                                     <OverlayTrigger
