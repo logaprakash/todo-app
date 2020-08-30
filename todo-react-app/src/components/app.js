@@ -1,4 +1,5 @@
-import React, {Component} from 'react'; 
+import React, {Component} from 'react';
+import ReactDOM from 'react-dom' 
   
 import Row from 'react-bootstrap/Row'; 
 import Col from 'react-bootstrap/Col'; 
@@ -10,6 +11,7 @@ import Card from 'react-bootstrap/Card';
 import Navbar from 'react-bootstrap/Navbar'; 
 import Tooltip from 'react-bootstrap/Tooltip'; 
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger'; 
+
   
 class App extends Component  { 
     constructor(props) {
@@ -29,6 +31,7 @@ class App extends Component  {
 
     componentDidMount(){
         this.reloadBuckets()
+        document.title = "Todo App"
     }
 
     reloadBuckets(){
