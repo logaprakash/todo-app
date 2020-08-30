@@ -18,8 +18,13 @@ class App extends Component  {
             bucketList: [],
             bucketName:'',
             itemText:'',
-        }  
+        } 
+        this.forceUpdateHandler = this.forceUpdateHandler.bind(this); 
     }
+    forceUpdateHandler(){
+        this.forceUpdate();
+    };
+      
 
     componentDidMount(){
         this.reloadBuckets(0)
@@ -32,6 +37,7 @@ class App extends Component  {
                     this.setState({bucketList:data})
                 }
         );
+        
     }
 
     handleBucketChange(value){
@@ -41,26 +47,24 @@ class App extends Component  {
     
     addBucket() {
         if(this.state.bucketName !== '' ){ 
-            
-            let tempBucketName = this.state.bucketName
-            let tempList = {
-                bucket_id:tempLastBucketId+1,
-                bucket_name:tempBucketName,
-                todoList:[],
-            }
+            const body = new FormData
+            body.append("bucket_name", this.state.bucketName)
 
-            fetch('https://mywebsite.com/endpoint/', {
-                method: 'POST',
+            fetch("http://localhost:8000/api/insert_bucket", {
+                body,
                 headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
+                   
                 },
-                body: JSON.stringify({
-                    bucket_name: tempBucketName,
-                })
-            })
-            
+                method: "POST"
+            }).then(response => response.json())
+            .then(data => {
+                    console.log(data)
+                }
+            );
+
             this.reloadBuckets()
+            this.forceUpdateHandler()
+            
         }else{
             alert("Bucket Name is mandatory")
         }
@@ -68,20 +72,22 @@ class App extends Component  {
     }
 
     addItemToBucket(bucketId){
-        let bucketList = []
-        let tempBucketList = this.state.bucketList
-        for (let i = 0; i < tempBucketList.length; i++) {
-            if(tempBucketList[i].bucket_id === bucketId){
-                let tempTodo = {
-                    id:tempBucketList[i].todoList.length+1,
-                    text:'',
-                    is_checked:false
-                }
-                tempBucketList[i].todoList = [...tempBucketList[i].todoList,tempTodo]
+        const body = new FormData
+        body.append("bucket_id", bucketId)
+        body.append("todo_text", '')
+
+        fetch("http://localhost:8000/api/insert_todo_to_bucket", {
+            body,
+            headers: {},
+            method: "POST"
+        }).then(response => response.json())
+        .then(data => {
+                console.log(data)
             }
-            bucketList = [...bucketList, tempBucketList[i]]
-        } 
-        this.setState({bucketList:bucketList})
+        );
+
+        this.reloadBuckets()
+        this.forceUpdateHandler()
     }
 
     
@@ -99,12 +105,30 @@ class App extends Component  {
             bucketList = [...bucketList, tempBucketList[i]] 
         }
         this.setState({bucketList:bucketList})
+        
+        
+
     }
 
     deleteBucket(bucketId){
-        this.setState({bucketList: this.state.bucketList.filter(function(bucket) { 
-            return bucket.bucket_id !== bucketId
-        })});
+
+        const body = new FormData
+        body.append("bucket_id", bucketId)
+
+        fetch("http://localhost:8000/api/delete_bucket", {
+            body,
+            headers: {},
+            method: "DELETE"
+        }).then(response => response.json())
+        .then(data => {
+                console.log(data)
+            }
+        );
+
+        
+        this.reloadBuckets()
+        this.forceUpdateHandler()
+        
     }
 
     render(){ 
@@ -173,7 +197,7 @@ class App extends Component  {
                                     </ListGroup>
                                 </Card.Text>
                             </Card.Body>
-
+                                <Button variant="primary">Save Bucket</Button>
                             </Card>
                     </Col>
 
