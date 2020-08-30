@@ -111,7 +111,6 @@ class App extends Component  {
             
         }else{
             alert("Bucket Name is mandatory")
-            this.setShow(true)
         }
 
     }
@@ -249,6 +248,8 @@ class App extends Component  {
                             <FormControl
                                 placeholder="Bucket Name"
                                 id="add-bucket-textbox"
+                                type="text"
+                                maxLength={60}
                                 onChange={item=>this.handleBucketChange(item.target.value)}
                             />
 
@@ -312,6 +313,8 @@ class App extends Component  {
                                                         <FormControl
                                                             defaultValue={todo.todo_text} 
                                                             placeholder="ToDo Item"
+                                                            type="text"
+                                                            maxLength={512}
                                                             onChange={item=>this.handleTodoTextChange(bucket.bucket_id,todo.todo_id,item.target.value)}
                                                         />
                                                         <InputGroup.Append>
